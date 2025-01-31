@@ -217,7 +217,8 @@ def generate_chat_response(user_prompt):
         print(chat_response)
         print(re.sub(r'```json\n|```', '', chat_response).strip())
         if 'sql' in chat_response:
-            chat_response = chat_response.split("sql")[1][1:-4]
+            chat_response = ast.literal_eval(re.sub(r'```json\n|```', '', chat_response).strip())['sql']
+        #     chat_response.split("sql")[1][1:-4]
         if 'query' in chat_response:
             chat_response = ast.literal_eval(re.sub(r'```json\n|```', '', chat_response).strip())['query']
         # Extract request ID (acts as session ID)
