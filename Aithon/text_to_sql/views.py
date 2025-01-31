@@ -7,7 +7,9 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 from .serializers import InteractionSerializer, MessageSerializer
-from .language_model import call_gpt , create_session
+from .language_model import generate_chat_response
+from .trino_md import get_image_data
+import pandas as pd
 
 
 @api_view(["GET"])
@@ -28,18 +30,14 @@ def create_or_update_interaction(request):
     if not thread_id:
         return Response({"error": "thread_id is required"}, status=status.HTTP_400_BAD_REQUEST)
 
-    # Check if interaction exists
-    interaction = InteractionModel.objects.filter(thread_id=thread_id).first()
-
-    if interaction:
-        session_id = interaction.session_id
-    else:
-
-        session_id = create_session()
-        interaction = InteractionModel.objects.create(session_id=session_id, thread_id=thread_id)
+    session_id = "viewbnuqlkn"
+    interaction = InteractionModel.objects.create(session_id=session_id, thread_id=thread_id)
     MessageModel.objects.create(interaction=interaction, text=prompt_text, type="user")
-    result = call_gpt(session_id)
-    message = MessageModel.objects.create(interaction=interaction, text=result, type="ai")
+    result = generate_chat_response(prompt_text)
+    # print(result)
+    df = get_image_data(result)
+    response = df.loc[:20].to_markdown()
+    message = MessageModel.objects.create(interaction=interaction, text=response, query_result=result,type="ai")
 
     interaction_serializer = InteractionSerializer(interaction)
     message_serializer = MessageSerializer(message)
