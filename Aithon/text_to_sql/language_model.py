@@ -215,6 +215,7 @@ def generate_chat_response(user_prompt):
         result = response.json()
         chat_response = result["choices"][0]["message"]["content"]
         print(chat_response)
+        print(re.sub(r'```json\n|```', '', chat_response).strip())
         if 'sql' in chat_response:
             chat_response = chat_response.split("sql")[1][1:-4]
         if 'query' in chat_response:

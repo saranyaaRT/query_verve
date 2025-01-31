@@ -15,7 +15,8 @@ import pandas as pd
 @api_view(["GET"])
 def get_messages_by_thread(request, thread_id):
     """Fetch all messages related to a given thread_id"""
-    messages = MessageModel.objects.all().order_by("timestamp")
+    interaction = get_object_or_404(InteractionModel, thread_id=thread_id)
+    messages = interaction.messages.all().order_by("timestamp")
     serializer = MessageSerializer(messages, many=True)
     return Response(serializer.data)
 
@@ -28,6 +29,16 @@ def create_or_update_interaction(request):
 
     if not thread_id:
         return Response({"error": "thread_id is required"}, status=status.HTTP_400_BAD_REQUEST)
+
+    interaction = InteractionModel.objects.filter(thread_id=thread_id).first()
+
+    if interaction:
+        # If interaction exists, use the existing session_id
+        session_id = interaction.session_id
+    else:
+        # If interaction doesn't exist, create a new session_id and interaction
+        session_id = "viewbnuqlkn"
+        interaction = InteractionModel.objects.create(session_id=session_id, thread_id=thread_id)
 
     session_id = "viewbnuqlkn"
     interaction = InteractionModel.objects.create(session_id=session_id, thread_id=thread_id)
@@ -43,6 +54,7 @@ def create_or_update_interaction(request):
 
     return Response(
         {
+
             "message": message_serializer.data
         },
         status=status.HTTP_201_CREATED
