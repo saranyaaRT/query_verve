@@ -15,8 +15,7 @@ import pandas as pd
 @api_view(["GET"])
 def get_messages_by_thread(request, thread_id):
     """Fetch all messages related to a given thread_id"""
-    interaction = get_object_or_404(InteractionModel, thread_id=thread_id)
-    messages = interaction.messages.all().order_by("timestamp")
+    messages = MessageModel.objects.all().order_by("timestamp")
     serializer = MessageSerializer(messages, many=True)
     return Response(serializer.data)
 
@@ -37,14 +36,13 @@ def create_or_update_interaction(request):
     # print(result)
     df = get_image_data(result)
     response = df.loc[:20].to_markdown()
-    message = MessageModel.objects.create(interaction=interaction, text=response, query_result=result,type="ai")
+    message = MessageModel.objects.create(interaction=interaction, text=response, type="ai")
 
     interaction_serializer = InteractionSerializer(interaction)
     message_serializer = MessageSerializer(message)
 
     return Response(
         {
-            "interaction": interaction_serializer.data,
             "message": message_serializer.data
         },
         status=status.HTTP_201_CREATED

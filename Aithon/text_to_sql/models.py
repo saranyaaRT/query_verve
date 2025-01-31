@@ -12,7 +12,6 @@ class MessageModel(models.Model):
     interaction = models.ForeignKey(InteractionModel, on_delete=models.CASCADE, related_name="messages")
     # user = models.CharField(max_length=255)  # Store user identifier (e.g., username, ID)
     text = models.TextField()
-    query_result = models.TextField(null=True, blank=True)
     type = models.CharField(max_length=255)
     timestamp = models.DateTimeField(auto_now_add=True)  # Automatically set timestamp
 
